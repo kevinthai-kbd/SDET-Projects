@@ -15,19 +15,26 @@ public class RebalanceCalculator
         currentWeights = new HashMap<>();
         desiredWeights = new HashMap<>();
         mapDeltas = new HashMap<>();
-
-        currentPrices.put("SPMO",(double) 40000);
-        currentPrices.put("IDMO",(double) 12400);
-        currentPrices.put("BRK.B",(double) 5000);
-        currentWeights = calculateWeights();
-        desiredWeights.put("SPMO",0.70);
-        desiredWeights.put("IDMO",0.20);
-        desiredWeights.put("BRK.B",0.10);
-        calculateDeltaWithoutSelling();
-        //outputDelta();
     }
 
-    public Map<String, Double> calculateWeights()
+    public void addTicker(String name, Double costBasis, Double desiredWeight)
+    {
+        currentPrices.put(name, costBasis);
+        desiredWeights.put(name, desiredWeight);
+        currentWeights = calculateCurrentWeight(); // recalculate current weights after every addition
+    }
+
+    public boolean checkKeys()
+    {
+        for(Map.Entry<String, Double> entry : currentWeights.entrySet())
+        {
+            if(!desiredWeights.keySet().contains(entry.getKey()))
+                return false;
+        }
+        return true;
+    }
+
+    public Map<String, Double> calculateCurrentWeight()
     {
         double total = 0;
         Map<String, Double> desiredWeightsTemp = new HashMap<>();
@@ -49,7 +56,6 @@ public class RebalanceCalculator
         for(Map.Entry<String, Double> entry : mapDeltas.entrySet())
         {
             System.out.print(entry.getKey() + ": ");
-
             System.out.println(entry.getValue());
         }
     }
@@ -69,11 +75,14 @@ public class RebalanceCalculator
             }
         }
 
+        if(maxKey == "")
+            return;
+
         // gets price with the greatest delta, we use this as an anchor
         double newTotal = currentPrices.get(maxKey) / desiredWeights.get(maxKey);
         // total * desired weight = current price
         newTotal = Math.round(newTotal * 100.0) / 100.0;
-        System.out.println(maxKey);
+
 
         // calculate the delta between current cost basis and cost basis for desired allocation
         for(Map.Entry<String, Double> entry : currentWeights.entrySet())
@@ -81,6 +90,7 @@ public class RebalanceCalculator
             String key = entry.getKey();
             mapDeltas.put(key, (newTotal * desiredWeights.get(key)) - currentPrices.get(key));
         }
+        outputDelta();
     }
 
 
