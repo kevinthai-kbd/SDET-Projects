@@ -17,6 +17,17 @@ public class RebalanceCalculator
         mapDeltas = new HashMap<>();
     }
 
+    public Map<String, Double> getDeltaMap()
+    {
+        return this.mapDeltas;
+    }
+
+    public Double getDelta(String ticker)
+    {
+        if(this.mapDeltas.containsKey(ticker))
+            return this.mapDeltas.get(ticker);
+        return -1.0;
+    }
     public void addTicker(String name, Double costBasis, Double desiredWeight)
     {
         currentPrices.put(name, costBasis);
@@ -90,7 +101,6 @@ public class RebalanceCalculator
             String key = entry.getKey();
             mapDeltas.put(key, (newTotal * desiredWeights.get(key)) - currentPrices.get(key));
         }
-        outputDelta();
     }
 
 
