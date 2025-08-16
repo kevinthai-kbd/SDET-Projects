@@ -1,10 +1,9 @@
 // AppTest.java
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class RebalanceAPITests {
+public class RebalanceUnitTests {
     double delta = 0.01; // Acceptable difference
     // Logic Tests
     @Test
@@ -65,6 +64,7 @@ public class RebalanceAPITests {
     }
     void invalidKeyTest()
     {
+        // getDelta returns -1 if an invalid key is supplied
         RebalanceCalculator calculator = new RebalanceCalculator();
         calculator.addTicker("SPMO", 2000.0, 0.70);
         calculator.addTicker("BRKB", 3000.0, 0.20);
@@ -76,6 +76,13 @@ public class RebalanceAPITests {
 
     // Output Test
 
+    void outputDeltaTest() {
+        RebalanceCalculator calculator = new RebalanceCalculator();
+        calculator.addTicker("VOO", 87434.0, 0.70);
+        calculator.addTicker("VXUS", 45629.0, 0.20);
+        calculator.addTicker("BND", 10000.0, 0.10);
+        calculator.calculateDeltaWithoutSelling();
+        calculator.outputDelta();
 
-
+    }
 }
