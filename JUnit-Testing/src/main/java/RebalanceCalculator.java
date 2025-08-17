@@ -7,6 +7,7 @@ public class RebalanceCalculator
     private Map<String, Double> currentWeights;
     private Map<String, Double> desiredWeights;
     private Map<String, Double> mapDeltas;
+    private Map<String, Double> percentDeltas;
     // static Scanner scanner;
 
     public RebalanceCalculator()
@@ -15,6 +16,7 @@ public class RebalanceCalculator
         currentWeights = new HashMap<>();
         desiredWeights = new HashMap<>();
         mapDeltas = new HashMap<>();
+        percentDeltas = new HashMap<>();
     }
 
     public Map<String, Double> getDeltaMap()
@@ -101,6 +103,52 @@ public class RebalanceCalculator
             String key = entry.getKey();
             mapDeltas.put(key, (newTotal * desiredWeights.get(key)) - currentPrices.get(key));
         }
+    }
+
+    public void removeTicker(String name) {
+        currentPrices.remove(name);
+        desiredWeights.remove(name);
+        currentWeights = calculateCurrentWeight();
+        rebalanceDesiredWeights();
+    }
+
+    public void updateTickerValue(String name, Double newCostBasis) {
+        if (currentPrices.containsKey(name)) {
+            currentPrices.put(name, newCostBasis);
+            currentWeights = calculateCurrentWeight();
+        }
+    }
+    void calculateDeltaPercentages() {
+        for (String key : mapDeltas.keySet()) {
+            double current = currentPrices.get(key);
+            if (current != 0) {
+                percentDeltas.put(key, mapDeltas.get(key) / current);
+            } else {
+                percentDeltas.put(key, 0.0);
+            }
+        }
+    }
+    public Map<String, Double> getDeltaPercentages() {
+        return percentDeltas;
+    }
+
+    public Double getDesiredWeight(String key) {
+        return desiredWeights.get(key);
+    }
+
+    public void rebalanceDesiredWeights()
+    {
+        double total = 0;
+        for(Map.Entry<String, Double> entry : desiredWeights.entrySet())
+        {
+            total += entry.getValue();
+        }
+
+        for(Map.Entry<String, Double> entry : desiredWeights.entrySet())
+        {
+            entry.setValue(entry.getValue()/total);
+        }
+
     }
 
 
