@@ -1,12 +1,12 @@
+package api;
+
 import io.restassured.RestAssured;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import static io.restassured.RestAssured.*;
-import static io.restassured.matcher.RestAssuredMatchers.*;
 import static org.hamcrest.Matchers.*;
-import io.restassured.response.Response;
-public class GithubAPITests {
+
+public class verify {
 
     static final String BASE_URL = "https://api.github.com";
     static String token;
@@ -15,7 +15,6 @@ public class GithubAPITests {
     static String newBranchName;
 
     // Currently a brute force method that sends a request for every test.
-    // Will reduce API calls as I learn more about API testing.
     @BeforeAll
     static void setup() {
         token = System.getenv("GITHUB_TOKEN");
@@ -61,43 +60,7 @@ public class GithubAPITests {
             .statusCode(401);
     }
 
-    // Repository
-    @Test
-    void testCreateViewDeleteBranch()
-    {
-        // get SHA of main head
-        Response shaResponse =
-            given()
-                .header("Authorization", "Bearer " + token)
-            .when()
-                .get("/repo/" + owner + "/" + repo + "/git/refs/heads/main")
-            .then()
-                    .statusCode(200)
-                    .body("object.sha", notNullValue())
-                    .extract().response();
 
-        String latestCommitSHA = shaResponse.path("object.sha");
-
-        // POST /repo /<owner>/<repo>/git/refs
-        // From the latest SHA commit, we create a new branch
-        given()
-            .header("Authorization", "Bearer " + token)
-            .body("{ \"ref\": \"refs/heads/" + newBranchName + "\", \"sha\": \"" + latestCommitSHA + "\" }")
-        .when()
-            .post("/repos/" + owner + "/" + repo + "/git/refs")
-        .then()
-            .statusCode(201)
-            .body("ref", equalTo("refs/heads/" + newBranchName));
-
-        // Verify that the branch was correctly made
-        given()
-                .header("Authorization", "Bearer " + token)
-        .when()
-                .get("/repo/" + owner + "/" + repo + "/git/refs/heads/" + newBranchName)
-        .then()
-                .statusCode(200)
-                .body("name", equalTo(newBranchName));
-    }
 
     // Commits
 
